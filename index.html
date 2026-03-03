@@ -459,16 +459,116 @@
     @keyframes countUp{from{opacity:0;}to{opacity:1;}}
 
     /* ─────────────────────────────────────
+       HAMBURGER BUTTON
+    ───────────────────────────────────── */
+    .nav-burger{
+      display:none;
+      flex-direction:column;justify-content:center;align-items:center;
+      gap:5px;width:36px;height:36px;
+      background:transparent;border:1px solid var(--border);
+      border-radius:2px;cursor:pointer;padding:6px;flex-shrink:0;
+    }
+    .nav-burger span{
+      display:block;width:18px;height:1px;
+      background:var(--green);transition:all .3s;
+    }
+    .nav-burger.open span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+    .nav-burger.open span:nth-child(2){opacity:0;}
+    .nav-burger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+
+    /* ─────────────────────────────────────
        RESPONSIVE
     ───────────────────────────────────── */
-    @media(max-width:900px){
-      section{padding:100px 30px 60px;}
-      .hero-inner{padding:0 30px;}
+
+    /* ── DESKTOP (1200px+) ── */
+    @media(min-width:1200px){
+      section{padding:120px 100px 80px;}
+      .hero-inner{padding:0 100px;}
+    }
+
+    /* ── TABLET (600–1024px) ── */
+    @media(max-width:1024px){
+      section{padding:100px 48px 60px;}
+      .hero-inner{padding:0 48px;}
       .about-grid{grid-template-columns:1fr;}
-      nav{padding:14px 24px;}
-      .nav-links{gap:16px;}
-      footer{padding:20px 30px;flex-direction:column;gap:8px;text-align:center;}
-      .hero-scroll{left:30px;}
+      .stats-grid{grid-template-columns:repeat(2,1fr);}
+      .ops-grid{grid-template-columns:repeat(2,1fr);}
+      .ach-row{grid-template-columns:repeat(2,1fr);}
+      footer{padding:20px 48px;flex-direction:column;gap:8px;text-align:center;}
+      .hero-scroll{left:48px;}
+    }
+
+    /* ── MOBILE (≤768px) — hamburger kicks in ── */
+    @media(max-width:768px){
+      /* Nav */
+      nav{padding:14px 20px;}
+      .nav-burger{display:flex;}
+      .nav-links{
+        display:none;
+        position:fixed;top:57px;left:0;right:0;
+        background:rgba(3,3,3,.98);
+        border-bottom:1px solid var(--border);
+        flex-direction:column;gap:0;
+        z-index:999;
+      }
+      .nav-links.open{display:flex;}
+      .nav-links a{
+        padding:16px 24px;font-size:13px;letter-spacing:2px;
+        border-bottom:1px solid var(--border);
+        display:block;
+      }
+      .nav-links a:last-child{border-bottom:none;}
+
+      /* Sections */
+      section{padding:90px 20px 60px;}
+      .hero-inner{padding:0 20px;}
+      .hero-scroll{left:20px;}
+
+      /* Hero text */
+      .hero-name{font-size:clamp(40px,14vw,72px);letter-spacing:3px;}
+      .hero-handle{font-size:clamp(14px,4vw,22px);letter-spacing:4px;}
+      .hero-cta{flex-direction:column;gap:12px;}
+      .hero-cta .btn{text-align:center;justify-content:center;}
+
+      /* About */
+      .about-grid{grid-template-columns:1fr;gap:28px;}
+      .about-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+      .stat-num{font-size:32px;}
+
+      /* Skills */
+      .skill-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+
+      /* Projects */
+      .ops-grid{grid-template-columns:1fr;}
+
+      /* Achievements */
+      .ach-row{grid-template-columns:repeat(2,1fr);gap:12px;}
+      .ach-num{font-size:26px;}
+
+      /* CTF table — make it scroll */
+      .ctf-table{font-size:12px;}
+      .terminal-block{overflow-x:auto;}
+
+      /* Certs */
+      .cert-list{grid-template-columns:1fr;}
+
+      /* Contact */
+      .ct-line{font-size:12px;}
+
+      /* Footer */
+      footer{padding:20px;flex-direction:column;gap:8px;text-align:center;}
+
+      /* Hide cursor on touch */
+      #cursor{display:none;}
+      body{cursor:auto;}
+    }
+
+    /* ── SMALL MOBILE (≤400px) ── */
+    @media(max-width:400px){
+      .about-stats{grid-template-columns:1fr;}
+      .ach-row{grid-template-columns:1fr;}
+      .skill-grid{grid-template-columns:1fr;}
+      .hero-name{font-size:clamp(36px,12vw,60px);}
     }
   </style>
 </head>
@@ -481,13 +581,16 @@
 <!-- ── NAV ── -->
 <nav>
   <div class="nav-logo">THEWILDEYE</div>
-  <div class="nav-links">
-    <a href="#about">ABOUT</a>
-    <a href="#arsenal">ARSENAL</a>
-    <a href="#ops">OPS</a>
-    <a href="#intel">INTEL</a>
-    <a href="#contact">CONNECT</a>
+  <div class="nav-links" id="nav-links">
+    <a href="#about" onclick="closeNav()">ABOUT</a>
+    <a href="#arsenal" onclick="closeNav()">ARSENAL</a>
+    <a href="#ops" onclick="closeNav()">OPS</a>
+    <a href="#intel" onclick="closeNav()">INTEL</a>
+    <a href="#contact" onclick="closeNav()">CONNECT</a>
   </div>
+  <button class="nav-burger" id="nav-burger" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- ════════════════════════════════
@@ -496,8 +599,8 @@
 <section id="hero">
   <div class="hero-inner">
     <div class="boot-line">[ SYS ] Initializing secure shell…</div>
-    <div class="boot-line green">[ OK  ] OSINT engine loaded</div>
-    <div class="boot-line green">[ OK  ] Recon framework active</div>
+    <div class="boot-line green">[ OK  ] OSINT engine loaded — NFSU B.Tech-M.Tech CSE (Cybersecurity)</div>
+    <div class="boot-line green">[ OK  ] Recon framework active — CGPA: 8.80</div>
     <div class="boot-line red">[ !!!  ] TARGET IDENTIFIED — vyomnagpal.in</div>
 
     <h1 class="hero-name">VYOM<br>NAGPAL</h1>
@@ -531,14 +634,17 @@
         <div class="t-line"><span class="t-prompt">root@wildeye:~$ </span><span class="t-cmd">whoami --verbose</span></div>
         <div class="t-line t-out">Name      : <strong>Vyom Nagpal</strong></div>
         <div class="t-line t-out">Handle    : <span class="hi">TheWildEye</span></div>
-        <div class="t-line t-out">Role      : <strong>M.Tech Cybersecurity Student</strong></div>
-        <div class="t-line t-out">Speciality: <span class="hi">Offensive Security & SecOps</span></div>
+        <div class="t-line t-out">Role      : <strong>B.Tech - M.Tech CSE (Cybersecurity)</strong></div>
+        <div class="t-line t-out">Uni       : <span class="hi">National Forensic Sciences University</span></div>
+        <div class="t-line t-out">CGPA      : <span class="hi">8.80</span></div>
+        <div class="t-line t-out">Email     : <strong>vyomnagpal7@gmail.com</strong></div>
+        <div class="t-line t-out">Location  : <strong>Ahmedabad, Gujarat, India</strong></div>
         <br>
         <div class="t-line"><span class="t-prompt">root@wildeye:~$ </span><span class="t-cmd">cat mission.txt</span></div>
-        <div class="t-line t-out">Focused on <span class="hi">Reconnaissance, OSINT</span></div>
-        <div class="t-line t-out">threat analysis, and endpoint</div>
-        <div class="t-line t-out">fingerprinting. I build tools that</div>
-        <div class="t-line t-out">are fast, practical, and built for</div>
+        <div class="t-line t-out">Cybersecurity enthusiast developing</div>
+        <div class="t-line t-out">expertise in <span class="hi">Recon, OSINT, VA/PT.</span></div>
+        <div class="t-line t-out">Ex-Intern @ <span class="hi">ShadowFox</span>. Preparing for</div>
+        <div class="t-line t-out"><span class="hi">CEH</span> cert. Building tools for</div>
         <div class="t-line t-out"><span class="hi">real-world use.</span></div>
         <br>
         <div class="t-line"><span class="t-prompt">root@wildeye:~$ </span><span class="t-cmd">locate vyom<span style="animation:blink .7s infinite">▌</span></span></div>
@@ -636,123 +742,44 @@
 
   <div class="ops-grid">
     <div class="op-card reveal" style="transition-delay:.05s">
-      <div class="op-header">
-        <div class="op-name">THEWILDEYE FW</div>
-        <span class="op-tag">FLAGSHIP</span>
-      </div>
-      <div class="op-body">
-        Unified recon & OSINT framework — the main toolkit. Designed for fast, practical threat intelligence gathering in real-world engagements.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">OSINT</span>
-        <span class="lang-dot">Recon</span>
-      </div>
+      <div class="op-header"><div class="op-name">QUANTUMSHIELD</div><span class="op-tag">HACKATHON</span></div>
+      <div class="op-body">Post-Quantum Secure OpenID Connect using <strong>KEMTLS</strong>. Built as a solution for <strong>C3iHub Hackathon 2026 by IIT Kanpur</strong> — Top 25 finalist.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">KEMTLS</span><span class="lang-dot">Post-Quantum</span></div>
     </div>
-
     <div class="op-card reveal" style="transition-delay:.1s">
-      <div class="op-header">
-        <div class="op-name">WAFHUNTER</div>
-        <span class="op-tag">TOOL</span>
-      </div>
-      <div class="op-body">
-        Fingerprints Web Application Firewalls via <strong>DNS, CN & SAN probing</strong>. Detects WAF presence before launching web attacks — critical recon phase tool.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">DNS</span>
-        <span class="lang-dot">TLS</span>
-      </div>
+      <div class="op-header"><div class="op-name">THEWILDEYE FW</div><span class="op-tag">FLAGSHIP</span></div>
+      <div class="op-body">Unified Recon & OSINT Framework. A cross-platform offensive security toolkit for web <strong>Vulnerability Assessment & Penetration Testing</strong>.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">OSINT</span><span class="lang-dot">Recon</span></div>
     </div>
-
     <div class="op-card reveal" style="transition-delay:.15s">
-      <div class="op-header">
-        <div class="op-name">EVIDENTIAL</div>
-        <span class="op-tag">FORENSICS</span>
-      </div>
-      <div class="op-body">
-        Chain of Custody Integrity Management system with <strong>SHA-256 cryptographic evidence verification</strong> — built for digital forensics workflows.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">SHA-256</span>
-        <span class="lang-dot">Forensics</span>
-      </div>
+      <div class="op-header"><div class="op-name">WAFHUNTER</div><span class="op-tag">TOOL</span></div>
+      <div class="op-body">Automated WAF detection using <strong>active HTTP probing, header fingerprinting</strong> and response analysis to identify deployed firewalls.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">DNS</span><span class="lang-dot">TLS</span></div>
     </div>
-
     <div class="op-card reveal" style="transition-delay:.2s">
-      <div class="op-header">
-        <div class="op-name">DIRHUNTER</div>
-        <span class="op-tag">TOOL</span>
-      </div>
-      <div class="op-body">
-        Multithreaded, cross-platform <strong>directory brute-forcer</strong> with HTTP code & redirect handling. Fast enumeration for web attack surface mapping.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">Multithreaded</span>
-        <span class="lang-dot">HTTP</span>
-      </div>
+      <div class="op-header"><div class="op-name">TIGERHUNT</div><span class="op-tag">TOOL</span></div>
+      <div class="op-body">Multithreaded dirbuster with <strong>HTTP methods/redirects handling</strong>, systematic reporting with interactive UI/UX for web reconnaissance.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">Multithreaded</span><span class="lang-dot">HTTP</span></div>
     </div>
-
     <div class="op-card reveal" style="transition-delay:.25s">
-      <div class="op-header">
-        <div class="op-name">WPHUNTER</div>
-        <span class="op-tag">TOOL</span>
-      </div>
-      <div class="op-body">
-        WordPress attack-surface mapper — enumerates users, plugins & detects <strong>security misconfigurations</strong>. Essential for WP penetration testing engagements.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">WordPress</span>
-        <span class="lang-dot">Enum</span>
-      </div>
+      <div class="op-header"><div class="op-name">EVIDENTIAL</div><span class="op-tag">FORENSICS</span></div>
+      <div class="op-body">Chain of Custody Integrity Management with <strong>SHA-256 cryptographic evidence verification</strong> — built for digital forensics workflows.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">SHA-256</span><span class="lang-dot">Forensics</span></div>
     </div>
-
     <div class="op-card reveal" style="transition-delay:.3s">
-      <div class="op-header">
-        <div class="op-name">TIGERCRAWLER</div>
-        <span class="op-tag">OSINT</span>
-      </div>
-      <div class="op-body">
-        Passive <strong>domain-wide email harvesting</strong> crawler. Silently collects email addresses for OSINT correlation — no active probing, pure passive recon.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">Crawler</span>
-        <span class="lang-dot">Passive</span>
-      </div>
+      <div class="op-header"><div class="op-name">TIGERCRAWLER</div><span class="op-tag">OSINT</span></div>
+      <div class="op-body">Passive <strong>domain-wide email harvesting</strong> crawler. Silently collects email addresses for OSINT correlation — no active probing, pure passive recon.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">Crawler</span><span class="lang-dot">Passive</span></div>
     </div>
-
     <div class="op-card reveal" style="transition-delay:.35s">
-      <div class="op-header">
-        <div class="op-name">WHOIS PARSER</div>
-        <span class="op-tag">INTEL</span>
-      </div>
-      <div class="op-body">
-        Advanced WHOIS parser that transforms raw registry output into <strong>structured recon intel</strong> — clean, parseable data for downstream analysis.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">WHOIS</span>
-        <span class="lang-dot">Parsing</span>
-      </div>
+      <div class="op-header"><div class="op-name">WPHUNTER</div><span class="op-tag">TOOL</span></div>
+      <div class="op-body">WordPress attack-surface mapper — enumerates users, plugins & detects <strong>security misconfigurations</strong>. Essential for WP penetration testing engagements.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">WordPress</span><span class="lang-dot">Enum</span></div>
     </div>
-
     <div class="op-card reveal" style="transition-delay:.4s">
-      <div class="op-header">
-        <div class="op-name">DARKINTEL</div>
-        <span class="op-tag">PLATFORM</span>
-      </div>
-      <div class="op-body">
-        Full-stack threat intelligence platform — IP intel, domain analysis, breach monitoring, ransomware tracking, malware lookup & URL scanning in one terminal UI.
-      </div>
-      <div class="op-footer">
-        <span class="lang-dot">HTML/CSS/JS</span>
-        <span class="lang-dot">Python</span>
-        <span class="lang-dot">APIs</span>
-      </div>
+      <div class="op-header"><div class="op-name">WHOIS PARSER</div><span class="op-tag">INTEL</span></div>
+      <div class="op-body">Advanced WHOIS parser that transforms raw registry output into <strong>structured recon intel</strong> — clean, parseable data for downstream analysis.</div>
+      <div class="op-footer"><span class="lang-dot">Python</span><span class="lang-dot">WHOIS</span><span class="lang-dot">Parsing</span></div>
     </div>
   </div>
 </section>
@@ -767,21 +794,26 @@
 
   <div class="ach-row">
     <div class="ach-card reveal" style="transition-delay:.05s">
+      <span class="ach-icon">🚀</span>
+      <span class="ach-num" data-target="25">0</span>
+      <span class="ach-lbl">C3iHUB IIT KANPUR HACKATHON 2026 — TOP 25</span>
+    </div>
+    <div class="ach-card reveal" style="transition-delay:.1s">
       <span class="ach-icon">🏆</span>
       <span class="ach-num" data-target="9">#0</span>
       <span class="ach-lbl">NFSU CTF 2023 OVERALL RANK</span>
     </div>
-    <div class="ach-card reveal" style="transition-delay:.1s">
+    <div class="ach-card reveal" style="transition-delay:.15s">
       <span class="ach-icon">⚡</span>
       <span class="ach-num" data-target="5">#0</span>
       <span class="ach-lbl">NFSU CTF 2023 MVP RANK</span>
     </div>
-    <div class="ach-card reveal" style="transition-delay:.15s">
+    <div class="ach-card reveal" style="transition-delay:.2s">
       <span class="ach-icon">🥈</span>
       <span class="ach-num" data-target="28">#0</span>
       <span class="ach-lbl">NFSU CTF 2022 OVERALL RANK</span>
     </div>
-    <div class="ach-card reveal" style="transition-delay:.2s">
+    <div class="ach-card reveal" style="transition-delay:.25s">
       <span class="ach-icon">🐛</span>
       <span class="ach-num" data-target="3">0</span>
       <span class="ach-lbl">BUGS RESPONSIBLY DISCLOSED</span>
@@ -833,45 +865,45 @@
         <span class="cert-icon">🏅</span>
         <div>
           <div class="cert-name">Foundation Level Threat Intelligence Analyst</div>
-          <div class="cert-issuer">arcX</div>
-        </div>
-      </div>
-      <div class="cert-item reveal" style="transition-delay:.1s">
-        <span class="cert-icon">🏅</span>
-        <div>
-          <div class="cert-name">ISO/IEC 27001:2022 Information Security Associate</div>
-          <div class="cert-issuer">Skillfront</div>
+          <div class="cert-issuer">arcX — June 2025</div>
         </div>
       </div>
       <div class="cert-item reveal" style="transition-delay:.15s">
         <span class="cert-icon">🏅</span>
         <div>
-          <div class="cert-name">Cyber Threat Management</div>
-          <div class="cert-issuer">Cisco</div>
+          <div class="cert-name">ISO/IEC 27001:2022 Information Security Associate</div>
+          <div class="cert-issuer">Skillfront — June 2025</div>
         </div>
       </div>
       <div class="cert-item reveal" style="transition-delay:.2s">
+        <span class="cert-icon">🏅</span>
+        <div>
+          <div class="cert-name">Cyber Threat Management</div>
+          <div class="cert-issuer">Cisco — May 2025</div>
+        </div>
+      </div>
+      <div class="cert-item reveal" style="transition-delay:.25s">
         <span class="cert-icon">🏅</span>
         <div>
           <div class="cert-name">Cyber Security Associate</div>
           <div class="cert-issuer">Reliance Foundation</div>
         </div>
       </div>
-      <div class="cert-item reveal" style="transition-delay:.25s">
+      <div class="cert-item reveal" style="transition-delay:.3s">
         <span class="cert-icon">🏅</span>
         <div>
           <div class="cert-name">Certified Cyber Hygiene Practitioner</div>
           <div class="cert-issuer">ISEA</div>
         </div>
       </div>
-      <div class="cert-item reveal" style="transition-delay:.3s">
+      <div class="cert-item reveal" style="transition-delay:.35s">
         <span class="cert-icon">🏅</span>
         <div>
           <div class="cert-name">SQL Injection Attacks</div>
           <div class="cert-issuer">EC-Council</div>
         </div>
       </div>
-      <div class="cert-item reveal" style="transition-delay:.35s">
+      <div class="cert-item reveal" style="transition-delay:.4s">
         <span class="cert-icon">🏅</span>
         <div>
           <div class="cert-name">Intro to Dark Web, Anonymity & Cryptocurrency</div>
@@ -899,11 +931,13 @@
       <div class="ct-body">
         <div class="ct-line"><span class="t-prompt">root@wildeye:~$ </span><span class="t-cmd">netstat --open-ports</span></div>
         <br>
+        <div class="ct-line"><span class="ct-key">EMAIL     ──→  </span><span class="ct-val"><a href="mailto:vyomnagpal7@gmail.com">vyomnagpal7@gmail.com</a></span></div>
         <div class="ct-line"><span class="ct-key">GITHUB    ──→  </span><span class="ct-val"><a href="https://github.com/thewildeye" target="_blank">github.com/thewildeye</a></span></div>
         <div class="ct-line"><span class="ct-key">LINKEDIN  ──→  </span><span class="ct-val"><a href="https://linkedin.com/in/vyomnagpal" target="_blank">linkedin.com/in/vyomnagpal</a></span></div>
+        <div class="ct-line"><span class="ct-key">LOCATION  ──→  </span><span class="ct-val">Ahmedabad, Gujarat, India</span></div>
         <div class="ct-line"><span class="ct-key">DOMAIN    ──→  </span><span class="ct-val"><a href="https://vyomnagpal.in" target="_blank">vyomnagpal.in</a></span></div>
         <br>
-        <div class="ct-line"><span class="t-prompt">root@wildeye:~$ </span><span class="t-cmd">echo "Open to security research, CTF teams, bug bounty collabs"<span style="animation:blink .7s infinite">▌</span></span></div>
+        <div class="ct-line"><span class="t-prompt">root@wildeye:~$ </span><span class="t-cmd">echo "Open to security research, CTF teams, bug bounty & internship opportunities"<span style="animation:blink .7s infinite">▌</span></span></div>
       </div>
     </div>
 
@@ -968,9 +1002,10 @@ window.addEventListener('scroll',()=>{
 
 /* ── TYPEWRITER ── */
 const phrases=[
-  'M.Tech Cybersecurity Student',
+  'B.Tech - M.Tech CSE (Cybersecurity) @ NFSU',
   'Recon & OSINT Specialist',
-  'CTF Player — NFSU Rank #9',
+  'CTF Player — NFSU Rank #5 MVP',
+  'IIT Kanpur C3iHub Hackathon Finalist',
   'Bug Hunter & Security Researcher',
   'Building Tools for the Real World',
 ];
@@ -995,9 +1030,15 @@ const io=new IntersectionObserver(entries=>{
     if(e.isIntersecting){
       e.target.classList.add('in');
       /* Counter animation */
-      e.target.querySelectorAll('[data-target]').forEach(el=>animateCounter(el));
+      e.target.querySelectorAll('[data-target]').forEach(el=>{
+        el.dataset.counted='';
+        animateCounter(el);
+      });
       /* Skill bars */
       e.target.querySelectorAll('[data-width]').forEach(el=>{el.style.width=el.dataset.width+'%';});
+    } else {
+      e.target.classList.remove('in');
+      e.target.querySelectorAll('[data-width]').forEach(el=>{el.style.width='0%';});
     }
   });
 },{threshold:.1});
@@ -1025,14 +1066,14 @@ function animateCounter(el){
 new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting)
-      e.target.querySelectorAll('[data-target]').forEach(el=>animateCounter(el));
+      e.target.querySelectorAll('[data-target]').forEach(el=>{el.dataset.counted='';animateCounter(el);});
   });
 },{threshold:.2}).observe(document.getElementById('about'));
 
 new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting)
-      e.target.querySelectorAll('[data-target]').forEach(el=>animateCounter(el));
+      e.target.querySelectorAll('[data-target]').forEach(el=>{el.dataset.counted='';animateCounter(el);});
   });
 },{threshold:.2}).observe(document.getElementById('intel'));
 
@@ -1043,6 +1084,19 @@ new IntersectionObserver(entries=>{
       e.target.querySelectorAll('[data-width]').forEach(el=>{el.style.width=el.dataset.width+'%';});
   });
 },{threshold:.1}).observe(document.getElementById('arsenal'));
+function toggleNav(){
+  document.getElementById('nav-links').classList.toggle('open');
+  document.getElementById('nav-burger').classList.toggle('open');
+}
+function closeNav(){
+  document.getElementById('nav-links').classList.remove('open');
+  document.getElementById('nav-burger').classList.remove('open');
+}
+// Close nav on outside click
+document.addEventListener('click',e=>{
+  const nav=document.querySelector('nav');
+  if(!nav.contains(e.target)) closeNav();
+});
 </script>
 </body>
 </html>
