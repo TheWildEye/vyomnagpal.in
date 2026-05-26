@@ -2497,7 +2497,7 @@
           setTimeout(reveal, 700);
 
           /* Fetch geo in background — update placeholders when ready */
-          fetch('https://ipapi.co/json/')
+          fetch('https://ipv4.ipapi.co/json/')
             .then(r => r.json())
             .then(data => {
               const ip      = data.ip           || '?.?.?.?';
