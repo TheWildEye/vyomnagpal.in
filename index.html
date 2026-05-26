@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -2382,7 +2382,6 @@
             <div style="font-family:var(--display);font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:4px;">Foundation Level Threat Intelligence Analyst</div>
             <div style="color:var(--text-dim);font-size:13px;">arcX &middot; June 2025</div>
           </div>
-          <div class="proj-tag-col"><span class="op-tag">THREAT INTEL</span></div>
         </div>
 
         <div class="proj-row reveal" style="transition-delay:.1s;">
@@ -2394,7 +2393,6 @@
             <div style="font-family:var(--display);font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:4px;">ISO/IEC 27001:2022 Information Security Associate</div>
             <div style="color:var(--text-dim);font-size:13px;">Skillfront &middot; June 2025</div>
           </div>
-          <div class="proj-tag-col"><span class="op-tag">ISO 27001</span></div>
         </div>
 
         <div class="proj-row reveal" style="transition-delay:.15s;">
@@ -2406,7 +2404,6 @@
             <div style="font-family:var(--display);font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:4px;">Cyber Threat Management</div>
             <div style="color:var(--text-dim);font-size:13px;">Cisco &middot; May 2025</div>
           </div>
-          <div class="proj-tag-col"><span class="op-tag">CISCO</span></div>
         </div>
 
         <div class="proj-row reveal" style="transition-delay:.2s;">
@@ -2418,7 +2415,6 @@
             <div style="font-family:var(--display);font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:4px;">Cyber Security Associate</div>
             <div style="color:var(--text-dim);font-size:13px;">Reliance Foundation</div>
           </div>
-          <div class="proj-tag-col"><span class="op-tag">FOUNDATION</span></div>
         </div>
 
         <div class="proj-row reveal" style="transition-delay:.25s;">
@@ -2430,7 +2426,6 @@
             <div style="font-family:var(--display);font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:4px;">Certified Cyber Hygiene Practitioner</div>
             <div style="color:var(--text-dim);font-size:13px;">ISEA &middot; Govt. of India</div>
           </div>
-          <div class="proj-tag-col"><span class="op-tag">GOVT.</span></div>
         </div>
 
         <div class="proj-row reveal" style="transition-delay:.3s;">
@@ -2442,7 +2437,6 @@
             <div style="font-family:var(--display);font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:4px;">SQL Injection Attacks</div>
             <div style="color:var(--text-dim);font-size:13px;">EC-Council</div>
           </div>
-          <div class="proj-tag-col"><span class="op-tag">EC-COUNCIL</span></div>
         </div>
 
         <div class="proj-row reveal" style="transition-delay:.35s;">
@@ -2454,7 +2448,6 @@
             <div style="font-family:var(--display);font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:4px;">Intro to Dark Web, Anonymity &amp; Cryptocurrency</div>
             <div style="color:var(--text-dim);font-size:13px;">EC-Council</div>
           </div>
-          <div class="proj-tag-col"><span class="op-tag">EC-COUNCIL</span></div>
         </div>
 
       </div>
@@ -2575,17 +2568,21 @@
           addLine('[ !!! ] TARGET ACQUIRED \u2014 vyomnagpal.in', 'red');
           setTimeout(reveal, 700);
 
-          /* Fetch geo in background — update placeholders when ready */
-          fetch('https://ipv4.ipapi.co/json/')
+          /* Step 1: get IPv4 (api4 subdomain forces v4), Step 2: get geo */
+          fetch('https://api4.ipify.org?format=json')
+            .then(r => r.json())
+            .then(d => {
+              const ip = d.ip || '?.?.?.?';
+              l1.textContent = `[ IP  ] Visitor detected : ${ip}`;
+              return fetch(`https://ipapi.co/${ip}/json/`);
+            })
             .then(r => r.json())
             .then(data => {
-              const ip      = data.ip           || '?.?.?.?';
               const city    = data.city         || '???';
               const country = cc[data.country_code] || data.country_name || '???';
-              l1.textContent = `[ IP  ] Visitor detected : ${ip}`;
               l2.textContent = `[ GEO ] Location locked  : ${city}, ${country}`;
             })
-            .catch(() => { /* keep placeholder text on failure */ });
+            .catch(() => { /* keep placeholder on failure */ });
 
         }, 450);
       }, 400);
