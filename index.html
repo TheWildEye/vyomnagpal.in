@@ -2497,19 +2497,16 @@
           setTimeout(reveal, 700);
 
           /* Fetch geo in background — update placeholders when ready */
-          const cb  = '_geo' + Date.now();
-          const s   = document.createElement('script');
-          const tid = setTimeout(() => { delete window[cb]; s.remove(); }, 6000);
-          window[cb] = data => {
-            clearTimeout(tid); delete window[cb]; s.remove();
-            const ip      = data.ip   || '?.?.?.?';
-            const city    = data.city || '???';
-            const country = cc[data.country] || data.country || '???';
-            l1.textContent = `[ IP  ] Visitor detected : ${ip}`;
-            l2.textContent = `[ GEO ] Location locked  : ${city}, ${country}`;
-          };
-          s.src = `https://ipinfo.io/jsonp?callback=${cb}`;
-          document.head.appendChild(s);
+          fetch('https://ipapi.co/json/')
+            .then(r => r.json())
+            .then(data => {
+              const ip      = data.ip           || '?.?.?.?';
+              const city    = data.city         || '???';
+              const country = cc[data.country_code] || data.country_name || '???';
+              l1.textContent = `[ IP  ] Visitor detected : ${ip}`;
+              l2.textContent = `[ GEO ] Location locked  : ${city}, ${country}`;
+            })
+            .catch(() => { /* keep placeholder text on failure */ });
 
         }, 450);
       }, 400);
