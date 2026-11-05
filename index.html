@@ -2745,25 +2745,30 @@
           addLine('[ !!! ] TARGET ACQUIRED \u2014 vyomnagpal.in', 'red');
           setTimeout(reveal, 700);
 
-          /* Step 1: get IPv4 (api4 subdomain forces v4), Step 2: get geo */
-          fetch('https://api4.ipify.org?format=json')
-            .then(r => r.json())
-            .then(d => {
-              const ip = d.ip || '?.?.?.?';
-              l1.textContent = `[ IP  ] Visitor detected : ${ip}`;
-              return fetch(`https://ipapi.co/${ip}/json/`);
-            })
+          /* Single call: IP + geo from same source (consistent), fallback to ipapi.co */
+          const paint = (ip, city, country) => {
+            l1.textContent = `[ IP  ] Visitor detected : ${ip}`;
+            l2.textContent = `[ GEO ] Location locked  : ${city}, ${country}`;
+          };
+          const fallback = () => {
+            fetch('https://ipapi.co/json/')
+              .then(r => r.json())
+              .then(data => {
+                if (!data || data.error) throw new Error('geo fail');
+                paint(data.ip || '?.?.?.?', data.city || '???', cc[data.country_code] || data.country_name || '???');
+              })
+              .catch(() => {
+                l1.textContent = '[ IP  ] Visitor detected : MASKED';
+                l2.textContent = '[ GEO ] Location locked  : CLASSIFIED';
+              });
+          };
+          fetch('https://ipwho.is/')
             .then(r => r.json())
             .then(data => {
-              if (!data || data.error) { l2.textContent = '[ GEO ] Location locked  : CLASSIFIED'; return; }
-              const city    = data.city         || '???';
-              const country = cc[data.country_code] || data.country_name || '???';
-              l2.textContent = `[ GEO ] Location locked  : ${city}, ${country}`;
+              if (!data || data.success === false) throw new Error('geo fail');
+              paint(data.ip || '?.?.?.?', data.city || '???', cc[data.country_code] || data.country || '???');
             })
-            .catch(() => {
-              l1.textContent = '[ IP  ] Visitor detected : MASKED';
-              l2.textContent = '[ GEO ] Location locked  : CLASSIFIED';
-            });
+            .catch(fallback);
 
         }, 450);
       }, 400);
