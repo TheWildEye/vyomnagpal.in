@@ -2745,30 +2745,39 @@
           addLine('[ !!! ] TARGET ACQUIRED \u2014 vyomnagpal.in', 'red');
           setTimeout(reveal, 700);
 
-          /* Single call: IP + geo from same source (consistent), fallback to ipapi.co */
+          /* Fallback chain of accurate geo providers — tries each in order until one succeeds */
           const paint = (ip, city, country) => {
             l1.textContent = `[ IP  ] Visitor detected : ${ip}`;
             l2.textContent = `[ GEO ] Location locked  : ${city}, ${country}`;
           };
-          const fallback = () => {
-            fetch('https://ipapi.co/json/')
-              .then(r => r.json())
-              .then(data => {
-                if (!data || data.error) throw new Error('geo fail');
-                paint(data.ip || '?.?.?.?', data.city || '???', cc[data.country_code] || data.country_name || '???');
-              })
-              .catch(() => {
-                l1.textContent = '[ IP  ] Visitor detected : MASKED';
-                l2.textContent = '[ GEO ] Location locked  : CLASSIFIED';
-              });
-          };
-          fetch('https://ipwho.is/')
-            .then(r => r.json())
-            .then(data => {
-              if (!data || data.success === false) throw new Error('geo fail');
-              paint(data.ip || '?.?.?.?', data.city || '???', cc[data.country_code] || data.country || '???');
-            })
-            .catch(fallback);
+          const providers = [
+            () => fetch('https://ipwho.is/').then(r => r.json()).then(d => {
+              if (!d || d.success === false) throw new Error('fail');
+              return { ip: d.ip, city: d.city, country: cc[d.country_code] || d.country };
+            }),
+            () => fetch('https://ipinfo.io/json').then(r => r.json()).then(d => {
+              if (!d || !d.ip) throw new Error('fail');
+              return { ip: d.ip, city: d.city, country: cc[d.country] || d.country };
+            }),
+            () => fetch('https://ipapi.co/json/').then(r => r.json()).then(d => {
+              if (!d || d.error) throw new Error('fail');
+              return { ip: d.ip, city: d.city, country: cc[d.country_code] || d.country_name };
+            }),
+            () => fetch('https://freeipapi.com/api/json').then(r => r.json()).then(d => {
+              if (!d || !d.ipAddress) throw new Error('fail');
+              return { ip: d.ipAddress, city: d.cityName, country: cc[d.countryCode] || d.countryName };
+            }),
+          ];
+          (function tryNext(i) {
+            if (i >= providers.length) {
+              l1.textContent = '[ IP  ] Visitor detected : MASKED';
+              l2.textContent = '[ GEO ] Location locked  : CLASSIFIED';
+              return;
+            }
+            providers[i]()
+              .then(p => paint(p.ip || '?.?.?.?', p.city || '???', p.country || '???'))
+              .catch(() => tryNext(i + 1));
+          })(0);
 
         }, 450);
       }, 400);
